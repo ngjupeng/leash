@@ -2,10 +2,16 @@ import { createPublicClient, defineChain, fallback, http } from 'viem';
 
 export const RPC_URL: string = import.meta.env.VITE_RPC_URL ?? 'https://rpc.mainnet.arc.io';
 
-// Circle's primary endpoint first, then the keyless node providers listed in Arc's docs. All allow CORS.
+// On Vercel, a same-origin proxy (vercel.json rewrite) comes first: content blockers with crypto filter
+// lists cancel requests to *.mainnet.arc.io, but have nothing to match on a same-origin path.
+// Then Circle's primary endpoint and the keyless node providers listed in Arc's docs. All allow CORS.
+const sameOriginProxy =
+  typeof location !== 'undefined' && location.hostname.endsWith('.vercel.app') ? [`${location.origin}/api/chain`] : [];
+
 export const RPC_URLS: string[] = import.meta.env.VITE_RPC_URL
   ? [import.meta.env.VITE_RPC_URL]
   : [
+      ...sameOriginProxy,
       'https://rpc.mainnet.arc.io',
       'https://rpc.quicknode.mainnet.arc.io',
       'https://rpc.drpc.mainnet.arc.io',

@@ -91,7 +91,9 @@ export function useVault(address: Address | null, pollMs = 4000) {
       setState(await loadVault(address));
       setError(null);
     } catch (e: any) {
-      setError(e?.shortMessage ?? String(e));
+      // Keep showing the last good state on a transient failure; only surface the error otherwise.
+      const detail = [e?.shortMessage, e?.details, e?.url && `(${e.url})`].filter(Boolean).join(' ');
+      setError(detail || String(e));
     }
   }, [address]);
   useEffect(() => {

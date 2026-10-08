@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createWalletClient, http, isAddress, stringToHex, type Address, type Hex } from 'viem';
+import { createWalletClient, isAddress, stringToHex, type Address, type Hex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { vaultAbi } from '../abi';
 import { Addr, Meter, Stat, StatusLine, useStatus } from '../components/ui';
 import { deployment } from '../deployment';
-import { arc, explorerTx, PAY_GAS_HEADROOM, publicClient, RPC_URL } from '../lib/chain';
+import { arc, arcTransport, explorerTx, PAY_GAS_HEADROOM, publicClient } from '../lib/chain';
 import { parseUsd, short, usd, usdPrecise } from '../lib/format';
 import { useVault } from '../lib/vault';
 import { walletClient } from '../lib/wallet';
@@ -28,7 +28,7 @@ type Result = { amount: bigint; gasCost: bigint; refund: bigint; ms: number; has
 export function AgentConsole({ initialVault }: { initialVault: Address | null }) {
   const [pk, setPk] = useState<Hex>(loadAgentKey);
   const account = useMemo(() => privateKeyToAccount(pk), [pk]);
-  const agent = useMemo(() => createWalletClient({ chain: arc, transport: http(RPC_URL), account }), [account]);
+  const agent = useMemo(() => createWalletClient({ chain: arc, transport: arcTransport(), account }), [account]);
   const [vaultInput, setVaultInput] = useState<string>(initialVault ?? '');
   const vaultAddr = isAddress(vaultInput) ? (vaultInput as Address) : null;
   const { state: v, refresh } = useVault(vaultAddr, 3000);

@@ -25,6 +25,10 @@ export function VaultPage({ address }: { address: Address }) {
         <div className="card">
           <h3>Couldn&apos;t read this vault</h3>
           <p className="sub">{error}</p>
+          <p className="sub" style={{ marginTop: 8 }}>
+            The app tried every Arc RPC endpoint. If this keeps happening, a browser extension or network filter may be blocking requests to
+            rpc.mainnet.arc.io. Try a private window or another network.
+          </p>
         </div>
       </div>
     );

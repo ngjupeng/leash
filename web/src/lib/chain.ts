@@ -1,6 +1,18 @@
-import { createPublicClient, defineChain, http } from 'viem';
+import { createPublicClient, defineChain, fallback, http } from 'viem';
 
 export const RPC_URL: string = import.meta.env.VITE_RPC_URL ?? 'https://rpc.mainnet.arc.io';
+
+// Circle's primary endpoint first, then the keyless node providers listed in Arc's docs. All allow CORS.
+export const RPC_URLS: string[] = import.meta.env.VITE_RPC_URL
+  ? [import.meta.env.VITE_RPC_URL]
+  : [
+      'https://rpc.mainnet.arc.io',
+      'https://rpc.quicknode.mainnet.arc.io',
+      'https://rpc.drpc.mainnet.arc.io',
+      'https://rpc.blockdaemon.mainnet.arc.io',
+    ];
+
+export const arcTransport = () => fallback(RPC_URLS.map((url) => http(url, { retryCount: 1, timeout: 12_000 })));
 export const EXPLORER = 'https://explorer.arc.io';
 
 export const arc = defineChain({
@@ -12,7 +24,7 @@ export const arc = defineChain({
   contracts: { multicall3: { address: '0xcA11bde05977b3631167028862bE2a173976CA11' } },
 });
 
-export const publicClient = createPublicClient({ chain: arc, transport: http(RPC_URL, { batch: true }) });
+export const publicClient = createPublicClient({ chain: arc, transport: arcTransport() });
 
 export const PQ_PRECOMPILE = '0x1800000000000000000000000000000000000004' as const;
 

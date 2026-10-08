@@ -4,8 +4,8 @@
 
 Leash is a USDC vault for AI agents. An agent spends with its own hot key under a hard daily cap in dollars, and that cap already includes the agent's gas. Anything that raises risk (adding an agent, raising a cap, withdrawing, unfreezing) needs a post-quantum SLH-DSA signature from the owner's cold key, verified on-chain by Arc's PQ precompile.
 
-- Live app: https://ngjupeng.github.io/leash/
-- Live demo vault: https://ngjupeng.github.io/leash/#/vault/0x5715F20Bb6A9cA267fbAEff4e8d67BEebE4a700F
+- Live app: https://leash-arc.vercel.app (mirror: https://ngjupeng.github.io/leash/)
+- Live demo vault: https://leash-arc.vercel.app/#/vault/0x5715F20Bb6A9cA267fbAEff4e8d67BEebE4a700F
 - Contracts on Arc mainnet: LeashFactory `0xf4ab955920b1361c1b3daee9b5743a526cfa970a`, verified on Sourcify
 
 ## The problem

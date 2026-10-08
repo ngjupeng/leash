@@ -5,7 +5,8 @@
 Leash is a USDC vault for AI agents. An agent spends with its own hot key under a hard daily cap in dollars, and that cap already includes the agent's gas. Anything that raises risk (adding an agent, raising a cap, withdrawing, unfreezing) needs a post-quantum SLH-DSA signature from the owner's cold key, verified on-chain by Arc's PQ precompile.
 
 - Live app: https://ngjupeng.github.io/leash/
-- Live demo vault: see [Mainnet deployment](#mainnet-deployment)
+- Live demo vault: https://ngjupeng.github.io/leash/#/vault/0x5715F20Bb6A9cA267fbAEff4e8d67BEebE4a700F
+- Contracts on Arc mainnet: LeashFactory `0xf4ab955920b1361c1b3daee9b5743a526cfa970a`, verified on Sourcify
 
 ## The problem
 
@@ -115,13 +116,43 @@ RPC=http://127.0.0.1:8547 node tools/demo.mjs
 
 Arc mainnet, chain id 5042.
 
-DEPLOYMENT_TABLE
+| Contract | Address |
+| --- | --- |
+| LeashFactory | [`0xf4ab955920b1361c1b3daee9b5743a526cfa970a`](https://explorer.arc.io/address/0xf4ab955920b1361c1b3daee9b5743a526cfa970a) ([Sourcify, exact match](https://sourcify.dev/#/lookup/0xf4ab955920b1361c1b3daee9b5743a526cfa970a)) |
+| Demo vault | [`0x5715F20Bb6A9cA267fbAEff4e8d67BEebE4a700F`](https://explorer.arc.io/address/0x5715F20Bb6A9cA267fbAEff4e8d67BEebE4a700F) ([Sourcify, exact match](https://sourcify.dev/#/lookup/0x5715F20Bb6A9cA267fbAEff4e8d67BEebE4a700F)) |
+| Demo agent | [`0xf9A4a33860E3648660fa5aE508896edE65335d49`](https://explorer.arc.io/address/0xf9A4a33860E3648660fa5aE508896edE65335d49) |
+| Arc PQ precompile | [`0x1800000000000000000000000000000000000004`](https://explorer.arc.io/address/0x1800000000000000000000000000000000000004) |
+
+Demo vault post-quantum public key: `0xac1001eef007a5da7da0ee3734a7ae5ef166012270951c4ee3ee3465ae1c9494`
+
+The full demo, run by `tools/demo.mjs` on mainnet:
+
+| Step | Transaction |
+| --- | --- |
+| Deploy LeashFactory | [`0xae58fe55...474a41`](https://explorer.arc.io/tx/0xae58fe55932fdb53bd941f6b7923e4ec2c1a0b387148bd6f8cd3f07f04474a41) |
+| Create the vault with 1.50 USDC | [`0xff6129be...ed53b8`](https://explorer.arc.io/tx/0xff6129be2244dc28633672a7a0142f73b4c1834410a142c9eb42ff1423ed53b8) |
+| Add an agent with a $0.25/day cap, SLH-DSA signed | [`0xb479ebb1...37bdfa`](https://explorer.arc.io/tx/0xb479ebb149324f6701adbac000beca6cead259b271d59613ebb79d36ed37bdfa) |
+| Agent pays $0.01, gas refunded | [`0xa9303571...5dfd9c`](https://explorer.arc.io/tx/0xa9303571e116bf78d52685ddfd86fa8d38ae2e06b195bff213a91c164b5dfd9c) |
+| Agent pays $0.02, gas refunded | [`0x07541b05...513486`](https://explorer.arc.io/tx/0x07541b05f0c6946b31e395db65b0d8df85bfbf1afd13579b6dd38e745c513486) |
+| Agent pays $0.05, gas refunded | [`0xc4ad5276...5d6e9a`](https://explorer.arc.io/tx/0xc4ad52764ae3fb511078ca9fa08c60369a46e4324f5b26dec7d09b75925d6e9a) |
+| Agent tries $0.50: refused with `OverCap` (simulated, not sent) | |
+| Owner freezes with the classical key | [`0x15e6d14d...74893d`](https://explorer.arc.io/tx/0x15e6d14de13415d70d8cdc2e4fb0ea64774d9766edd5fc07edffe227a374893d) |
+| Agent pay refused with `VaultFrozen`, owner `unfreeze()` without PQ refused with `NotGuarded` (simulated) | |
+| Unfreeze, SLH-DSA signed | [`0xddcf1240...9ec43f`](https://explorer.arc.io/tx/0xddcf1240efd66a5f4ee8f2ea2ca057fab922b809bf72f8bd52895578b29ec43f) |
+| Agent pays again | [`0xcd7d2257...28f328`](https://explorer.arc.io/tx/0xcd7d2257902e613df4ea94ad704231a35292ef334f0dbc5fd3e830c50428f328) |
 
 ## Gas on Arc mainnet
 
 | Action | Gas | Cost in USDC |
 | --- | --- | --- |
-GAS_TABLE
+| Create a vault | 2,910,065 | $0.058 |
+| Guarded action (add agent), includes 7,856-byte SLH-DSA signature check | 506,442 | $0.010 |
+| Guarded action (unfreeze) | 402,665 | $0.008 |
+| Agent `pay()` with on-chain receipt (first write to a slot) | 166,122 | $0.0033, refunded to the agent |
+| Agent `pay()` with on-chain receipt | 149,010 | $0.0030, refunded to the agent |
+| Owner `freeze()` | 29,504 | $0.0006 |
+
+At 20 gwei, which is Arc's base fee floor. Gas refunds matched the agent's actual gas cost to within $0.000001 on every payment.
 
 ## Security notes
 

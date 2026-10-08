@@ -1,0 +1,12 @@
+{
+  "name": "leash",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "pq": "node tools/pq.mjs"
+  },
+  "dependencies": {
+    "@noble/post-quantum": "0.7.1",
+    "viem": "2.57.4"
+  }
+}
